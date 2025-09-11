@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login/Register</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>AI Interview Webapp</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="login">Login</button>
+      <button class="tab-button" data-tab="register">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login" class="tab-content active">
+      <h2>Login</h2>
+      <input type="text" id="login-username" placeholder="username"/>
+      <input type="password" id="login-password" placeholder="password"/>
+      <!-- <span class="toggle-password" onclick="togglePassword()">👁</span> -->
+      <button onclick="login()">Confrim</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register" class="tab-content">
+      <h2>Register</h2>
+      <input type="text" id="reg-username" placeholder="username"/>
+      <input type="password" id="reg-password" placeholder="password"/>
+      <!-- <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁</span> -->
+      <input type="password" id="reg-confirm-password" placeholder="confirm password"/>
+      <!-- <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁</span> -->
+      <button onclick="register()">Confirm</button>
+    </div>
+
+    <!-- Status -->
+    <div id="status" class="status-box"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
