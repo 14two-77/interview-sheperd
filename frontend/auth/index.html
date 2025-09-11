@@ -20,20 +20,35 @@
     <!-- Login Form -->
     <div id="login" class="tab-content active">
       <h2>Login</h2>
-      <input type="text" id="login-username" placeholder="username"/>
-      <input type="password" id="login-password" placeholder="password"/>
-      <!-- <span class="toggle-password" onclick="togglePassword()">👁</span> -->
-      <button onclick="login()">Confrim</button>
+      <div class="input-group">
+        <span class="icon">👤 |</span>
+        <input type="text" id="login-username" placeholder="Username"/>
+      </div>
+      <div class="input-group">
+        <span class="icon">🔒 |</span>
+        <input type="password" id="login-password" placeholder="Password"/>
+        <span class="toggle-password" onclick="togglePassword('login-password', this)">👁</span>
+      </div>
+      <button onclick="login()">Confirm</button>
     </div>
 
     <!-- Register Form -->
     <div id="register" class="tab-content">
       <h2>Register</h2>
-      <input type="text" id="reg-username" placeholder="username"/>
-      <input type="password" id="reg-password" placeholder="password"/>
-      <!-- <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁</span> -->
-      <input type="password" id="reg-confirm-password" placeholder="confirm password"/>
-      <!-- <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁</span> -->
+      <div class="input-group">
+        <span class="icon">👤 |</span>
+        <input type="text" id="reg-username" placeholder="Username"/>
+      </div>
+      <div class="input-group">
+        <span class="icon">🔒 |</span>
+        <input type="password" id="reg-password" placeholder="Password"/>
+        <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁</span>
+      </div>
+      <div class="input-group">
+        <span class="icon">🔒 |</span>
+        <input type="password" id="reg-confirm-password" placeholder="Confirm password"/>
+        <span class="toggle-password" onclick="togglePassword('reg-confirm-password', this)">👁</span>
+      </div>
       <button onclick="register()">Confirm</button>
     </div>
 

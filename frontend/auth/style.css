@@ -1,7 +1,7 @@
 /* พื้นหลัง gradient */
 body {
   font-family: 'Bai Jamjuree', sans-serif;
-  background: linear-gradient(135deg, #0f367a, #6dd5ed);
+  background: linear-gradient(135deg, #6dd5ed, #fff);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -12,18 +12,25 @@ body {
 /* กล่องหลัก */
 .container {
   background: #fff;
-  padding: 30px 25px;
+  padding: 50px 50px;
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  width: 400px;
+  width: 500px;
   margin: 10px;
   text-align: center;
   animation: fadeIn 0.5s ease-in-out;
 }
 
 h1 {
-  margin-bottom: 15px;
-  font-size: 22px;
+  margin-bottom: 50px;
+  font-size: 40px;
+  text-align: center;
+  color: #333;
+}
+
+h2 {
+  margin-bottom: 30px;
+  font-size: 30px;
   text-align: center;
   color: #333;
 }
@@ -38,21 +45,19 @@ h1 {
 }
 .tab-button {
   flex: 1;
-  padding: 10px;
+  padding: 15px;
   cursor: pointer;
   border: none;
   background: #f0f0f0;
-  font-size: 14px;
-  margin-right: 1px;
-  margin-left: 1px;
-  margin-top: 1px;
-  margin-bottom: 1px;
+  font-size: 17px;
+  margin: 1px;
   transition: 0.3s;
+  font-family: 'Bai Jamjuree', sans-serif;
 }
 .tab-button.active {
   background: #1e4486;
-  color: #fff;
-  font-weight: bold;
+  color: #ffffff;
+  font-weight: bolder;
 }
 
 /* Content */
@@ -65,13 +70,15 @@ h1 {
 }
 
 input {
+  font-family: 'Bai Jamjuree', sans-serif;
   display: block;
-  width: 94%;
+  width: 93%;
   margin-bottom: 12px;
-  padding: 10px;
+  padding: 15px;
   border-radius: 10px;
   border: 1px solid #ccc;
   outline: none;
+  font-size: 17px;
   transition: border 0.2s;
 }
 input:focus {
@@ -79,18 +86,54 @@ input:focus {
   box-shadow: 0 0 5px rgba(79,142,247,0.5);
 }
 
+.input-group {
+  position: relative;   /* สำคัญ! ให้ icon + toggle อยู่ในกรอบ input */
+  width: 93%;
+  margin: 0 auto 12px;
+}
 
+.input-group input {
+  width: 100%;
+  padding: 10px 40px 10px 45px; /* เว้นซ้ายให้ icon, ขวาให้ toggle */
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 17px;
+  box-sizing: border-box;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.input-group .toggle-password {
+  position: absolute;
+  right: 10px;           /* อยู่ขวาใน input */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  user-select: none;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.3);
+}
 
 button {
+  font-family: 'Bai Jamjuree', sans-serif;
   width: 100%;
-  padding: 10px;
+  padding: 15px;
   background: #4f8ef7;
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 15px;
+  font-size: 20px;
   cursor: pointer;
   transition: background 0.3s, transform 0.1s;
+  font-weight: bolder;
 }
 button:hover {
   background: #3b73cc;

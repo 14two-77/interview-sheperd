@@ -77,6 +77,16 @@ async function login() {
   }
 }
 
+function togglePassword(id, el) {
+  const input = document.getElementById(id);
+  if (input.type === "password") {
+    input.type = "text";
+    el.textContent = "🙈"; // เปลี่ยน icon
+  } else {
+    input.type = "password";
+    el.textContent = "👁"; // กลับเป็นตา
+  }
+}
 // --- Helper ---
 function showStatus(msg, type="success") {
   const el = document.getElementById("status");
