@@ -15,7 +15,7 @@ async function register() {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/register`, {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -47,7 +47,7 @@ async function login() {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/login`, {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
