@@ -38,7 +38,7 @@ async function register() {
 
 // --- Login ---
 async function login() {
-  saveUser({username:"abd"})
+  saveUser({ username: "abd" })
   navigate("/job-post")
   return
   // TODO: complete login

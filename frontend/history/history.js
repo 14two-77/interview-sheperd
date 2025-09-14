@@ -1,5 +1,6 @@
 // Load interview history
 function loadHistory() {
+  // TODO: complete loadHistory API
   const history = JSON.parse(localStorage.getItem("interviewHistory") || "[]")
   const historyList = document.getElementById("historyList")
   const emptyState = document.getElementById("emptyState")

@@ -40,7 +40,7 @@ function renderJobPostsPage() {
       document.getElementById("userGreeting").textContent = `Hello, ${currentUser.display_name || currentUser.username}`
       // Modal handlers
       document.getElementById("createJobPostBtn").addEventListener("click", () => {
-        
+
         document.getElementById("createModal").classList.remove("hidden")
         document.getElementById("createModal").classList.add("flex")
       })
