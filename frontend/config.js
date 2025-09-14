@@ -1,2 +1,2 @@
 
-const API_BASE_URL = "http://localhost:3000/v1";
+const API_BASE_URL = "http://localhost:3222/api";
