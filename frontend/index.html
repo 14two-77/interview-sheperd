@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Shepherd</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" type="text/css" href="./interview/interviewstyle.css">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <!-- SPA Navigation Bar -->
+  <header id="navbar" class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <h1 class="text-2xl font-bold text-gray-900">Interview Shepherd</h1>
+        <div class="flex items-center space-x-4">
+          <span id="userGreeting" class="text-gray-600"></span>
+          <button id="spaNewInterview" class="text-blue-600 hover:text-blue-800" onclick="navigate('/job-post')">Job
+            Posts</button>
+          <button id="spaHistory" class="text-blue-600 hover:text-blue-800"
+            onclick="navigate('/history')">Interviews</button>
+          <button id="logoutBtn" class="text-red-600 hover:text-red-800" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Main SPA Content -->
+  <div id="app" class="min-h-screen"></div>
+
+  <!-- Import all JS files for SPA -->
+  <!-- Pages -->
+  <script src="config.js"></script>
+  <script src="auth/auth.js"></script>
+  <script src="history/history.js"></script>
+  <script src="interview/interview.js"></script>
+  <script src="job-post/job-post.js"></script>
+  <script src="auth/index.js"></script>
+  <script src="history/index.js"></script>
+  <script src="interview/index.js"></script>
+  <script src="job-post/index.js"></script>
+  <script src="state.js"></script>
+  <script src="spa.js"></script>
+</body>
+
+</html>
