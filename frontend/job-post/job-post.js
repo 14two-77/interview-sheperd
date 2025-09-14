@@ -1,4 +1,3 @@
-
 // Mock jobpost data
 const mockJobPost = [
   {
@@ -30,42 +29,41 @@ const mockJobPost = [
 // Mock API functions
 async function getJobPost() {
   // TODO: complete get job post
-  // Mock API call - comment out real fetch
-  // const response = await fetch('/v1/jobpost', {
-  //     credentials: 'include'
-  // });
-  // return await response.json();
+  const response = await fetch(`${API_BASE_URL}/scenarios`, {
+      credentials: 'include'
+  });
+  return await response.json();
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ data: mockJobPost, meta: { total: mockJobPost.length } })
-    }, 300)
-  })
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve({ data: mockJobPost, meta: { total: mockJobPost.length } })
+  //   }, 300)
+  // })
 }
 
 async function createJobPost(title, description, language) {
   // TODO: complete create job post
-  // Mock API call - comment out real fetch
-  // const response = await fetch('/v1/jobpost', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     credentials: 'include',
-  //     body: JSON.stringify({ title, description, language })
-  // });
+  const response = await fetch('/api/scenarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ title, description, language })
+  });
+  return await response.json();
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newJobPost = {
-        id: mockJobPost.length + 1,
-        title,
-        description,
-        language,
-        created_at: new Date().toISOString(),
-      }
-      mockJobPost.push(newJobPost)
-      resolve(newJobPost)
-    }, 500)
-  })
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     const newJobPost = {
+  //       id: mockJobPost.length + 1,
+  //       title,
+  //       description,
+  //       language,
+  //       created_at: new Date().toISOString(),
+  //     }
+  //     mockJobPost.push(newJobPost)
+  //     resolve(newJobPost)
+  //   }, 500)
+  // })
 }
 
 
