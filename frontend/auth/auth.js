@@ -1,6 +1,5 @@
 // --- Register ---
 async function register() {
-  // TODO: complete register
   const username = document.getElementById("reg-username").value.trim();
   const password = document.getElementById("reg-password").value.trim();
   const confirmPassword = document.getElementById("reg-confirm-password").value.trim();
@@ -16,19 +15,20 @@ async function register() {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/register`, {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, password }) // ✅ ส่งแค่ที่ backend ต้องใช้
+      body: JSON.stringify({ username, password })
     });
 
     const data = await res.json();
     if (res.ok) {
       showStatus("✅ สมัครสมาชิกสำเร็จ!", "success");
+      // สลับไปหน้า login
       document.querySelector("[data-tab='login']").click();
     } else {
-      showStatus("❌ Register fail: " + (data.error || JSON.stringify(data)), "error");
+      showStatus("❌ Register fail: " + (data.error || data.message), "error");
     }
   } catch (err) {
     showStatus("❌ Error: " + err.message, "error");
@@ -38,10 +38,6 @@ async function register() {
 
 // --- Login ---
 async function login() {
-  saveUser({ username: "abd" })
-  navigate("/job-post")
-  return
-  // TODO: complete login
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
@@ -51,7 +47,7 @@ async function login() {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/login`, {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -60,14 +56,20 @@ async function login() {
 
     const data = await res.json();
     if (res.ok) {
-      showStatus("✅ ยินดีต้อนรับ " + data.user.username, "success");
+      // ตอนนี้ backend ไม่ส่ง user กลับมา → ใช้ username จาก input
+      saveUser({ username });
+      showStatus("✅ ยินดีต้อนรับ " + username, "success");
+
+      // ไปหน้า job-post
+      navigate("/job-post");
     } else {
-      showStatus("❌ Login fail: " + (data.error || JSON.stringify(data)), "error");
+      showStatus("❌ Login fail: " + (data.error || data.message), "error");
     }
   } catch (err) {
     showStatus("❌ Error: " + err.message, "error");
   }
 }
+
 
 // ----- Password toggle (keeps your icon change) -----
 function togglePassword(id, el) {
