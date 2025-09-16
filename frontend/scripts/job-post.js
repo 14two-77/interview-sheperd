@@ -36,12 +36,12 @@ cancelBtn.addEventListener("click", () => {
     createModal.classList.remove("flex");
 });
 
-createModal.addEventListener("click", (e) => {
-    if (e.target === createModal) {
-        createModal.classList.add("hidden");
-        createModal.classList.remove("flex");
-    }
-});
+// createModal.addEventListener("click", (e) => {
+//     if (e.target === createModal) {
+//         createModal.classList.add("hidden");
+//         createModal.classList.remove("flex");
+//     }
+// });
 
 createForm.addEventListener("submit", async (e) => {
     e.preventDefault();
