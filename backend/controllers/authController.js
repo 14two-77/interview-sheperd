@@ -9,7 +9,7 @@ exports.register = async (req, res) => {
     try {
         const { username, password } = req.body;
         const hashedPassword = hashPassword(password);
-        const user = await Users.create({ username, password: hashedPassword });
+        await Users.create({ username, password: hashedPassword });
         res.status(200).json({ message: 'OK' });
     } catch (err) {
         res.status(500).json({ error: 'Internal server error.' });
@@ -23,8 +23,37 @@ exports.login = async (req, res) => {
         const user = await Users.findOne({ username, password: hashedPassword });
         if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     
-        res.setHeader('Set-Cookie', `user_id=${user._id}; Path=/; HttpOnly`);
+        const isDev = process.env.NODE_ENV !== 'production';
+        res.setHeader('Set-Cookie',`user_id=${user._id}; Path=/; HttpOnly; SameSite=${isDev ? 'Lax' : 'None'}${isDev ? '' : '; Secure'}`);
+        
         res.status(200).json({ message: 'OK' });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+exports.logout = async (req, res) => {
+    try {
+        const isDev = process.env.NODE_ENV !== 'production';
+        res.setHeader('Set-Cookie', `user_id=; Path=/; HttpOnly; Max-Age=0; SameSite=${isDev ? 'Lax' : 'None'}${isDev ? '' : '; Secure'}`);
+
+        res.status(200).json({ message: 'OK' });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+
+exports.checkLogin = async (req, res) => {
+    try {
+        const userId = req.headers.cookie?.split('user_id=')[1];
+
+        if (!userId) return res.status(401).json({ user: null });
+
+        const user = await Users.findById(userId).select('-password');
+        if (!user) return res.status(401).json({ user: null });
+
+        res.status(200).json({ user: user._id });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }

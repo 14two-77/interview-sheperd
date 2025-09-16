@@ -8,33 +8,58 @@ const aiClient = new GoogleGenAI({
 });
 
 let clients = {};
-const interviewLocks = new Map();
+
+function systemInstructionBuilder(interview) {
+    return (
+        `
+            You are an AI Interviewer. Your job: simulate a realistic interview for a given job scenario using only the candidate's resume text and the candidate's chat replies. Follow these rules strictly. Job title, job description, and candidate's resume text are provided at the end of system instruction
+
+            A. Interview flow & behaviour
+            1. Follow this structured sequence unless the user asked for a different flow:
+            - Greeting & short intro
+            - Ask the candidate to give a short self-introduction (if not already provided)
+            - Background & experience questions
+            - Technical / role-specific questions (tailored to the scenario)
+            - Behavioral questions
+            - Motivation & role-fit questions
+            - Invite candidate questions
+            - Wrap-up
+            - Tell user to click on the stop interview button below to stop the interview.
+            2. Ask **one question at a time**, wait for the candidate answer, and adapt follow-ups based on the candidate's responses and the resume content.
+            3. Use the resume text to:
+            - Prioritize asking about relevant experience or claimed skills.
+            - Point out potential gaps or ask for clarifying details if something ambiguous is in the resume.
+            4. Do **not** provide evaluative feedback during the interview. Do not give final scores until instructed to end the interview by a backend control message (see section E).
+            5. Keep tone professional and supportive (real interviewer tone). Be natural and realistic.
+            6. Always respond ONLY in ${interview.language}, no other language, except for technical words.
+            7. When the user says first "{8c09f39da56f655f90be2f9d33680166d2ab803d}", the interview is started. Do the structured sequence immediately as A.1 states. **Introduce yourself with a realistic interviewer name (e.g., “My name is Sarah from the engineering team”), never mention being AI or neutral.**
+            8. Never include meta-comments, brackets, or explanations like “[Interviewer Name - ...]”. Always act fully in-character as a human interviewer.
+
+            B. When to stop
+            - When user starts the message with "{12c14e93d11e79dc92dc8446e4186b16094bc6aa}", the interview has ended. At that point, stop interviewer roleplay and wait for the next user instruction.
+
+            Job Title: "${interview.title}"
+            Job Description:
+            """
+            ${interview.description}
+            """
+            Resume:
+            """
+            ${interview.resume}
+            """
+            `
+    )
+}
 
 async function callAIWithRetry(userText, interview, chatHistory = [], retries = 3) {
     const model = 'gemini-2.5-flash';
-    const config = { thinkingConfig: { thinkingBudget: -1 } };
+    const config = {
+        thinkingConfig: { thinkingBudget: -1 }, systemInstruction: systemInstructionBuilder(interview)
+    };
 
     const contents = [];
 
-    contents.push({
-        role: 'user',
-        parts: [{
-            text: `
-                You are an interview coach.
-                **Always respond ONLY in ${interview.language}, no other language.**
-                Do NOT translate your responses.
-                Topic: ${interview.title}
-                Description: ${interview.description}
-
-                User Resume:
-                ${interview.resume}
-
-                Answer clearly, following the topic and user's resume, in ${interview.language}.
-            `
-        }]
-    });
-
-    chatHistory.slice(-10).forEach(msg => {
+    chatHistory.forEach(msg => {
         contents.push({
             role: msg.role === 'ai' ? 'model' : 'user',
             parts: [{ text: msg.text }]
@@ -61,17 +86,16 @@ async function callAIWithRetry(userText, interview, chatHistory = [], retries = 
 }
 
 exports.streamInterview = (req, res) => {
-    const userId = req.user._id.toString();
+    const userId = req.headers.cookie?.split('user_id=')[1];
     const interview = req.params.interview;
-
     if (!interview) return res.status(400).json({ error: 'interview required' });
 
     const key = `${userId}-${interview}`;
-
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
+    res.write('\n');
 
     if (!clients[key]) clients[key] = [];
     clients[key].push(res);
@@ -83,51 +107,111 @@ exports.streamInterview = (req, res) => {
 
 exports.sendMessage = async (req, res) => {
     const { interview_id, text } = req.body;
-    const user_id = req.user._id;
+    const user_id = req.headers.cookie?.split('user_id=')[1];
+    const key = `${user_id}-${interview_id}`;
 
     if (!interview_id || !text) return res.status(400).json({ error: 'Missing fields' });
 
-    const userMessage = await Messages.findOneAndUpdate(
+    await Messages.findOneAndUpdate(
         { interview_id },
         { $push: { messages: { role: 'user', text } } },
         { upsert: true, new: true }
     );
-    const lastMessageIndex = userMessage.messages.length - 1;
-    const lastMessageId = userMessage.messages[lastMessageIndex]._id;
 
     const interview = req.user.interviews.id(interview_id);
     const chat = await Messages.findOne({ interview_id });
     const chatHistory = chat ? chat.messages.slice(0, -1) : [];
 
-    while (interviewLocks.get(interview_id)) {
-        await new Promise(r => setTimeout(r, 200));
-    }
-    interviewLocks.set(interview_id, true);
-
     try {
-        const aiReply = await callAIWithRetry(text, interview, chatHistory);
+        const model = 'gemini-2.5-flash';
+        const config = {
+            thinkingConfig: { thinkingBudget: -1 },
+            systemInstruction: systemInstructionBuilder(interview)
+        };
 
-        await Messages.findOneAndUpdate(
-            { interview_id },
-            { $push: { messages: { role: 'ai', text: aiReply } } },
-            { upsert: true, new: true }
-        );
-
-        const key = `${user_id}-${interview_id}`;
-        if (clients[key]) {
-            const msg = `data: ${JSON.stringify({ message: 'AI Response Text', Result: aiReply })}\n\n`;
-            clients[key].forEach(res => res.write(msg));
-        }
+        const contents = [
+            ...chatHistory.map(msg => ({
+                role: msg.role === 'ai' ? 'model' : 'user',
+                parts: [{ text: msg.text }]
+            })),
+            { role: 'user', parts: [{ text }] }
+        ];
 
         res.status(200).json({ message: "OK" });
-    } catch (error) {
-        await Messages.updateOne(
-            { interview_id },
-            { $pull: { messages: { _id: lastMessageId } } }
-        );
-        res.status(503).json({ error: 'AI server overloaded. User message removed.' });
-    } finally {
-        interviewLocks.delete(interview_id);
+
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('AI response timeout')), 30000);
+        });
+
+        try {
+            const response = await Promise.race([
+                aiClient.models.generateContentStream({ model, config, contents }),
+                timeoutPromise
+            ]);
+
+            let fullText = '';
+
+            for await (const chunk of response) {
+                if (chunk.text) {
+                    fullText += chunk.text;
+
+                    if (clients[key]) {
+                        const msg = `data: ${JSON.stringify({
+                            role: 'ai',
+                            text: chunk.text,
+                            isFinal: false
+                        })}\n\n`;
+                        clients[key].forEach(clientRes => {
+                            try {
+                                clientRes.write(msg);
+                            } catch (err) {
+                                console.error('Error writing to client:', err);
+                            }
+                        });
+                    }
+                }
+            }
+
+            if (clients[key]) {
+                const msg = `data: ${JSON.stringify({
+                    role: 'ai',
+                    text: '', 
+                    isFinal: true,
+                    fullText: fullText
+                })}\n\n`;
+                clients[key].forEach(clientRes => {
+                    try {
+                        clientRes.write(msg);
+                    } catch (err) {
+                        console.error('Error writing to client:', err);
+                    }
+                });
+            }
+
+            await Messages.findOneAndUpdate(
+                { interview_id },
+                { $push: { messages: { role: 'ai', text: fullText } } },
+                { upsert: true, new: true }
+            );
+        } catch (streamError) {
+            throw streamError;
+        }
+
+    } catch (err) {
+        if (clients[key]) {
+            const errorMsg = `data: ${JSON.stringify({
+                role: 'error',
+                text: 'Sorry, there was an error processing your message.',
+                isFinal: true
+            })}\n\n`;
+            clients[key].forEach(clientRes => {
+                try {
+                    clientRes.write(errorMsg);
+                } catch (writeErr) {
+                    console.error('Error writing error message:', writeErr);
+                }
+            });
+        }
     }
 };
 
@@ -162,8 +246,33 @@ exports.getInterview = async (req, res) => {
         const interview = req.user.interviews.id(req.params.id);
         if (!interview) return res.status(404).json({ error: 'Not found' });
 
-        const chat = await Messages.findOne({ interview_id: interview._id });
-        res.json(chat);
+        res.status(200).json(interview);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+exports.getInterviewMessage = async (req, res) => {
+    try {
+        const interview = req.user.interviews.id(req.params.id);
+        if (!interview) {
+            return res.status(404).json({ messages: [] });
+        }
+
+        const chat = await Messages.find({ interview_id: interview._id });
+
+        if (!chat || chat.length === 0) return res.status(200).json({ messages: [] });
+
+        res.status(200).json({ messages: chat[0].messages || [] });
+    } catch (err) {
+        res.status(500).json({ messages: [] });
+    }
+};
+
+exports.getInterviewAll = async (req, res) => {
+    try {
+        const interview = [...req.user.interviews].reverse();
+        res.status(200).json(interview);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }
@@ -177,6 +286,8 @@ exports.finishInterview = async (req, res) => {
     const chatHistory = chat ? chat.messages : [];
 
     const prompt = `
+        {12c14e93d11e79dc92dc8446e4186b16094bc6aa}
+        
         You are an interview evaluator.
         Evaluate the user's answers in the following conversation for the topic: ${interview.title}.
         Use the user's resume for context:

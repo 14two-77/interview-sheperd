@@ -1,9 +1,35 @@
 const Scenarios = require('../models/Scenario');
+const mongoose = require('mongoose');
 
-exports.getAll = async (req, res) => {
-    const scenarios = await Scenarios.find({ userId: req.user._id });
-    res.json(scenarios);
+exports.getMe = async (req, res) => {
+    try {
+        const user_id = req.headers.cookie?.split('user_id=')[1];
+        
+        const scenarios = await Scenarios.find({ user_id }).sort({ _id: -1 });
+    
+        res.status(200).json(scenarios);
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error." });
+    }
 };
+
+exports.getOther = async (req, res) => {
+    try {
+        const user_id = req.headers.cookie?.split('user_id=')[1];
+
+        const count = await Scenarios.countDocuments({ user_id: { $ne: user_id } });
+
+        const scenarios = await Scenarios.aggregate([
+            { $match: { user_id: { $ne: new mongoose.Types.ObjectId(user_id) } } },
+            { $sample: { size: count } }
+        ]);
+
+        res.status(200).json(scenarios);
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
 
 exports.getOne = async (req, res) => {
     try {
@@ -16,7 +42,9 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
     try {
-        await Scenarios.create({ ...req.body, userId: req.user._id });
+        const user_id = req.headers.cookie?.split('user_id=')[1];
+
+        await Scenarios.create({ ...req.body, user_id });
         res.status(200).json({ massage: "OK" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error." });

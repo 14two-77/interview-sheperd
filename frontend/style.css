@@ -1,0 +1,29 @@
+@font-face {
+    font-family: 'font-regular';
+    src: url('./assets/fonts/Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'font-light';
+    src: url('./assets/fonts/Light.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'font-bold';
+    src: url('./assets/fonts/Bold.ttf') format('truetype');
+}
+
+body {
+    font-family: 'font-regular';
+}
+
+p::-webkit-scrollbar {
+    width: 4px;
+}
+p::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+p::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
