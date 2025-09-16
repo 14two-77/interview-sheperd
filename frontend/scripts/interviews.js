@@ -36,7 +36,7 @@ async function loadInterviews() {
                     </h3>
 
                     <p class="text-gray-600 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
-                        ${jobpost.description}
+                        ${item.description}
                     </p>
 
                     <div class="flex justify-between items-center mt-auto pt-4 border-t">
