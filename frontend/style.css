@@ -16,3 +16,14 @@
 body {
     font-family: 'font-regular';
 }
+
+p::-webkit-scrollbar {
+    width: 4px;
+}
+p::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+p::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

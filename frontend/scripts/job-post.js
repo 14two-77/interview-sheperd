@@ -104,7 +104,9 @@ async function loadJobPost() {
                         ${jobpost.title}
                     </h3>
 
-                    <p class="text-gray-600 text-sm mb-4 flex-grow">${jobpost.description}</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
+                        ${jobpost.description}
+                    </p>
 
                     <div class="flex justify-between items-center mt-auto pt-4 border-t">
                         <span class="text-xs text-gray-500">Language: ${String(jobpost.language || "").toUpperCase()}</span>
