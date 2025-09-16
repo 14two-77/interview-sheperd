@@ -61,17 +61,16 @@ async function callAIWithRetry(userText, interview, chatHistory = [], retries = 
 }
 
 exports.streamInterview = (req, res) => {
-    const userId = req.user._id.toString();
+    const userId = req.headers.cookie?.split('user_id=')[1];
     const interview = req.params.interview;
-
     if (!interview) return res.status(400).json({ error: 'interview required' });
 
     const key = `${userId}-${interview}`;
-
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
+    res.write('\n');
 
     if (!clients[key]) clients[key] = [];
     clients[key].push(res);
@@ -83,51 +82,67 @@ exports.streamInterview = (req, res) => {
 
 exports.sendMessage = async (req, res) => {
     const { interview_id, text } = req.body;
-    const user_id = req.user._id;
+    const user_id = req.headers.cookie?.split('user_id=')[1];
+    const key = `${user_id}-${interview_id}`;
 
     if (!interview_id || !text) return res.status(400).json({ error: 'Missing fields' });
 
-    const userMessage = await Messages.findOneAndUpdate(
+    await Messages.findOneAndUpdate(
         { interview_id },
         { $push: { messages: { role: 'user', text } } },
         { upsert: true, new: true }
     );
-    const lastMessageIndex = userMessage.messages.length - 1;
-    const lastMessageId = userMessage.messages[lastMessageIndex]._id;
+
+    if (clients[key]) {
+        const msg = `data: ${JSON.stringify({ role: 'user', text })}\n\n`;
+        clients[key].forEach(res => res.write(msg));
+    }
+
+    res.status(200).json({ message: "OK" });
 
     const interview = req.user.interviews.id(interview_id);
     const chat = await Messages.findOne({ interview_id });
     const chatHistory = chat ? chat.messages.slice(0, -1) : [];
 
-    while (interviewLocks.get(interview_id)) {
-        await new Promise(r => setTimeout(r, 200));
-    }
-    interviewLocks.set(interview_id, true);
-
     try {
-        const aiReply = await callAIWithRetry(text, interview, chatHistory);
+        const model = 'gemini-2.5-flash';
+        const config = { thinkingConfig: { thinkingBudget: -1 } };
+        const contents = [
+            {
+                role: 'user',
+                parts: [{ text: `You are an interview coach... Topic: ${interview.title} ...` }]
+            },
+            ...chatHistory.map(msg => ({
+                role: msg.role === 'ai' ? 'model' : 'user',
+                parts: [{ text: msg.text }]
+            })),
+            { role: 'user', parts: [{ text }] }
+        ];
 
-        await Messages.findOneAndUpdate(
-            { interview_id },
-            { $push: { messages: { role: 'ai', text: aiReply } } },
-            { upsert: true, new: true }
-        );
+        const response = await aiClient.models.generateContentStream({ model, config, contents });
 
-        const key = `${user_id}-${interview_id}`;
+        let fullText = '';
+        for await (const chunk of response) {
+            fullText += chunk.text;
+
+            if (clients[key]) {
+                const msg = `data: ${JSON.stringify({ role: 'ai', text: chunk.text, isFinal: false })}\n\n`;
+                clients[key].forEach(res => res.write(msg));
+            }
+        }
+
         if (clients[key]) {
-            const msg = `data: ${JSON.stringify({ message: 'AI Response Text', Result: aiReply })}\n\n`;
+            const msg = `data: ${JSON.stringify({ role: 'ai', text: fullText, isFinal: true })}\n\n`;
             clients[key].forEach(res => res.write(msg));
         }
 
-        res.status(200).json({ message: "OK" });
-    } catch (error) {
-        await Messages.updateOne(
+        await Messages.findOneAndUpdate(
             { interview_id },
-            { $pull: { messages: { _id: lastMessageId } } }
+            { $push: { messages: { role: 'ai', text: fullText } } },
+            { upsert: true, new: true }
         );
-        res.status(503).json({ error: 'AI server overloaded. User message removed.' });
-    } finally {
-        interviewLocks.delete(interview_id);
+    } catch (err) {
+        console.error(err);
     }
 };
 
@@ -162,11 +177,33 @@ exports.getInterview = async (req, res) => {
         const interview = req.user.interviews.id(req.params.id);
         if (!interview) return res.status(404).json({ error: 'Not found' });
 
-        const chat = await Messages.findOne({ interview_id: interview._id });
-        res.json(chat);
+        res.json(interview);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }
+};
+
+exports.getInterviewMessage = async (req, res) => {
+    try {
+        const interview = req.user.interviews.id(req.params.id);
+        if (!interview) {
+            return res.status(404).json({ messages: [] });
+        }
+
+        const chat = await Messages.find({ interview_id: interview._id });
+
+        if (!chat || chat.length === 0) return res.json({ messages: [] });
+        
+        return res.json({ messages: chat[0].messages || [] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ messages: [] });
+    }
+};
+
+exports.getInterviewAll = async (req, res) => {
+    const interview = req.user.interviews;
+    res.json(interview);
 };
 
 exports.finishInterview = async (req, res) => {

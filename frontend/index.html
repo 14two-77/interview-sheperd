@@ -2,51 +2,41 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interview Shepherd</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" type="text/css" href="./interview/interviewstyle.css">
-  <style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./assets/image/logo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./style.css">
+
+    <title>Interview Sheperd</title>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
-  <!-- SPA Navigation Bar -->
-  <header id="navbar" class="bg-white shadow-sm border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4">
-        <h1 class="text-2xl font-bold text-gray-900">Interview Shepherd</h1>
-        <div class="flex items-center space-x-4">
-          <span id="userGreeting" class="text-gray-600"></span>
-          <button id="spaNewInterview" class="text-blue-600 hover:text-blue-800" onclick="navigate('/job-post')">Job
-            Posts</button>
-          <button id="spaHistory" class="text-blue-600 hover:text-blue-800"
-            onclick="navigate('/history')">Interviews</button>
-          <button id="logoutBtn" class="text-red-600 hover:text-red-800" onclick="logout()">Logout</button>
-        </div>
-      </div>
-    </div>
-  </header>
-  <!-- Main SPA Content -->
-  <div id="app" class="min-h-screen"></div>
+<body>
+    <div id="navbar-placeholder"></div>
+    <div id="app"></div>
 
-  <!-- Import all JS files for SPA -->
-  <!-- Pages -->
-  <script src="config.js"></script>
-  <script src="auth/auth.js"></script>
-  <script src="history/history.js"></script>
-  <script src="interview/interview.js"></script>
-  <script src="job-post/job-post.js"></script>
-  <script src="auth/index.js"></script>
-  <script src="history/index.js"></script>
-  <script src="interview/index.js"></script>
-  <script src="job-post/index.js"></script>
-  <script src="state.js"></script>
-  <script src="spa.js"></script>
+    <div id="alert-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 hidden z-50 px-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
+            <p id="alert-message" class="text-gray-800 text-base text-base mb-4 break-words"></p>
+            <button id="alert-close" class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-black/30 flex items-center justify-center hidden z-50">
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+
+    <script src="./config.js"></script>
+    <script src="./utils.js"></script>
+    <script src="./state.js"></script>
+    <script src="./spa.js"></script>
 </body>
 
 </html>

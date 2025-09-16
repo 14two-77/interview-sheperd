@@ -20,6 +20,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/scenarios', require('./routes/scenario'));
 app.use('/api/interview', require('./routes/interview'));
+app.use('/api/user', require('./routes/user'));
 
 connectDB();
 

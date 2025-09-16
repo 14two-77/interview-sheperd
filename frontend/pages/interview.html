@@ -1,0 +1,62 @@
+<div class="bg-white border rounded-3xl shadow-lg max-w-4xl w-[95%] mx-auto my-10 flex flex-col h-[90vh] font-inter">
+    <div id="loading" class="hidden flex flex-col items-center justify-center flex-grow p-8 text-center">
+    </div>
+
+    <div id="content" class="flex flex-col flex-grow min-h-0 p-6 sm:p-8">
+        <div class="mb-4">
+            <button id="backBtn" class="inline-flex items-center gap-2 px-4 py-1
+                       bg-gray-300 text-gray-700 rounded-full shadow hover:bg-gray-400
+                       focus:outline-none transition-colors duration-200">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+
+
+        <div class="mb-6 sm:mb-8 text-center">
+            <h1
+                class="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent mb-2">
+                AI Interview
+            </h1>
+            <p class="text-gray-600 text-sm sm:text-base">
+                Prepare for your next interview with an AI-powered coach.
+            </p>
+        </div>
+
+        <div id="view-interview" class="flex flex-col flex-grow min-h-0">
+            <div id="chatBox" class="flex-1 text-sm overflow-y-auto min-h-0
+                    flex flex-col gap-4 px-4 py-2
+                    bg-gray-50 border border-gray-200 rounded-xl">
+            </div>
+
+            <div id="chatArea" class="mt-4 border-t border-gray-200 pt-4 bg-white">
+                <form id="chatForm" class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="chatInput" required autocomplete="off" placeholder="Type your answer here..." class="flex-grow text-sm p-3 border border-gray-300 rounded-xl
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2
+                bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700
+                focus:outline-none transition-colors duration-200">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                </form>
+                <button id="endInterviewBtn" class="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2
+               bg-red-600 text-white rounded-md shadow hover:bg-red-700
+               focus:outline-none transition-colors duration-200">
+                    End Interview & Get Feedback
+                </button>
+            </div>
+
+        </div>
+
+        <div id="view-feedback" class="hidden flex flex-col flex-grow">
+            <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">Interview Feedback</h2>
+            <div id="feedbackContent"
+                class="flex-grow mb-6 p-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 overflow-y-auto">
+            </div>
+            <button id="newInterviewBtn" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3
+                       bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700
+                       focus:outline-none transition-colors duration-200">
+                Start a New Interview
+            </button>
+        </div>
+    </div>
+</div>
