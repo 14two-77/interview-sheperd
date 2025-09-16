@@ -53,7 +53,7 @@ exports.checkLogin = async (req, res) => {
         const user = await Users.findById(userId).select('-password');
         if (!user) return res.status(401).json({ user: null });
 
-        res.json({ user: user._id });
+        res.status(200).json({ user: user._id });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }

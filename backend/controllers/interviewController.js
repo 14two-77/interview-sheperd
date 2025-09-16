@@ -8,7 +8,6 @@ const aiClient = new GoogleGenAI({
 });
 
 let clients = {};
-const interviewLocks = new Map();
 
 function systemInstructionBuilder(interview) {
     return (
@@ -199,8 +198,6 @@ exports.sendMessage = async (req, res) => {
         }
 
     } catch (err) {
-        console.error('AI Error:', err);
-
         if (clients[key]) {
             const errorMsg = `data: ${JSON.stringify({
                 role: 'error',
@@ -249,7 +246,7 @@ exports.getInterview = async (req, res) => {
         const interview = req.user.interviews.id(req.params.id);
         if (!interview) return res.status(404).json({ error: 'Not found' });
 
-        res.json(interview);
+        res.status(200).json(interview);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }
@@ -264,18 +261,21 @@ exports.getInterviewMessage = async (req, res) => {
 
         const chat = await Messages.find({ interview_id: interview._id });
 
-        if (!chat || chat.length === 0) return res.json({ messages: [] });
+        if (!chat || chat.length === 0) return res.status(200).json({ messages: [] });
 
-        return res.json({ messages: chat[0].messages || [] });
+        res.status(200).json({ messages: chat[0].messages || [] });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ messages: [] });
     }
 };
 
 exports.getInterviewAll = async (req, res) => {
-    const interview = [...req.user.interviews].reverse();
-    res.json(interview);
+    try {
+        const interview = [...req.user.interviews].reverse();
+        res.status(200).json(interview);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error.' });
+    }
 };
 
 exports.finishInterview = async (req, res) => {

@@ -6,9 +6,13 @@ function hashPassword(password) {
 }
 
 exports.get = async (req, res) => {
-    const userId = req.headers.cookie?.split('user_id=')[1];
-    const user = await Users.findById(userId).select('username -_id');
-    res.status(200).json({ user });
+    try {
+        const userId = req.headers.cookie?.split('user_id=')[1];
+        const user = await Users.findById(userId).select('username -_id');
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Update failed' });
+    }
 };
 
 exports.update = async (req, res) => {
@@ -23,7 +27,6 @@ exports.update = async (req, res) => {
 
         res.status(200).json({ message: "OK" });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ success: false, error: 'Update failed' });
     }
 };
