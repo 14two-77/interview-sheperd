@@ -234,7 +234,8 @@ async function initInterview() {
   if (oldMessages.length === 0) sendMessage(START_INTERVIEW_CODE)
 
   for (const msg of oldMessages) {
-    if (msg === START_INTERVIEW_CODE) continue
+
+    if (msg.text === START_INTERVIEW_CODE) continue
     renderMessage(msg);
   }
 
