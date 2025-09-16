@@ -32,11 +32,12 @@ A. Interview flow & behaviour
    - Point out potential gaps or ask for clarifying details if something ambiguous is in the resume.
 4. Do **not** provide evaluative feedback during the interview. Do not give final scores until instructed to end the interview by a backend control message (see section E).
 5. Keep tone professional and supportive (real interviewer tone). Be natural and realistic.
-6. Always respond ONLY in ${interview.language}, no other language. except for technical words.
-7. When the user say first "**sit**" mean the interview is started. Do the structured sequence immediately as A.1
+6. Always respond ONLY in ${interview.language}, no other language, except for technical words.
+7. When the user says first "{8c09f39da56f655f90be2f9d33680166d2ab803d}", the interview is started. Do the structured sequence immediately as A.1 states. **Introduce yourself with a realistic interviewer name (e.g., “My name is Sarah from the engineering team”), never mention being AI or neutral.**
+8. Never include meta-comments, brackets, or explanations like “[Interviewer Name - ...]”. Always act fully in-character as a human interviewer.
 
 B. When to stop
-- When user start the message by "{12c14e93d11e79dc92dc8446e4186b16094bc6aa}", it mean the interview already ended. You could do as the next user propmt said.
+- When user starts the message with "{12c14e93d11e79dc92dc8446e4186b16094bc6aa}", the interview has ended. At that point, stop interviewer roleplay and wait for the next user instruction.
 
 Job Title: "${interview.title}"
 Job Description:
@@ -50,6 +51,7 @@ ${interview.resume}
 `
   )
 }
+
 
 async function callAIWithRetry(userText, interview, chatHistory = [], retries = 3) {
   const model = 'gemini-2.5-flash';
@@ -123,7 +125,6 @@ exports.sendMessage = async (req, res) => {
     clients[key].forEach(res => res.write(msg));
   }
 
-  res.status(200).json({ message: "OK" });
 
   const interview = req.user.interviews.id(interview_id);
   const chat = await Messages.findOne({ interview_id });
@@ -141,6 +142,8 @@ exports.sendMessage = async (req, res) => {
       })),
       { role: 'user', parts: [{ text }] }
     ];
+
+    res.status(200).json({ message: "OK" });
 
     const response = await aiClient.models.generateContentStream({ model, config, contents });
 

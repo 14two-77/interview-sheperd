@@ -1,1 +1,2 @@
 const BASE_URL = "http://127.0.0.1:3222/api";
+const START_INTERVIEW_CODE = "{8c09f39da56f655f90be2f9d33680166d2ab803d}"
