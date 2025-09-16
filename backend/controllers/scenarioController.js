@@ -2,14 +2,18 @@ const Scenarios = require('../models/Scenario');
 
 exports.getMe = async (req, res) => {
     const user_id = req.headers.cookie?.split('user_id=')[1];
-    const scenarios = await Scenarios.find({ user_id });
+    const scenarios = await Scenarios.find({ user_id }).sort({ _id: -1 });
 
     res.json(scenarios);
 };
 
 exports.getOther = async (req, res) => {
     const user_id = req.headers.cookie?.split('user_id=')[1];
-    const scenarios = await Scenarios.find({ user_id: { $ne: user_id } });
+    const count = await Scenarios.countDocuments({ user_id: { $ne: user_id } });
+    const scenarios = await Scenarios.aggregate([
+        { $match: { user_id: { $ne: user_id } } },
+        { $sample: { size: count } }
+    ]);
 
     res.json(scenarios);
 };
