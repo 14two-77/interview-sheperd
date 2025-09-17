@@ -20,12 +20,12 @@ function closeEventSource() {
 
 function createEventSource() {
     closeEventSource();
-    
+
     eventSource = new EventSource(`${BASE_URL}/interview/${interview_id}/stream`, { withCredentials: true });
-    
+
     eventSource.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        
+
         if (data.role === 'user') {
             return;
         }
@@ -35,7 +35,7 @@ function createEventSource() {
                 removeLoading();
                 currentAIDiv = document.createElement('div');
                 currentAIDiv.className =
-                    'self-start w-full whitespace-pre-wrap text-black px-3 py-2';
+                    'self-start bg-[#4f817a]/10 text-[#1f3f3a] px-4 py-2 rounded-xl inline-block max-w-xl break-words';
                 chatBox.appendChild(currentAIDiv);
             }
 
@@ -53,8 +53,9 @@ function createEventSource() {
                 }, 100);
             }
         }
+
     };
-    
+
     eventSource.onerror = (error) => {
         console.error('EventSource error:', error);
         isAIResponding = false;
@@ -128,7 +129,7 @@ function sendMessage(text) {
     if (text !== START_INTERVIEW_CODE) {
         const userMessage = document.createElement('div');
         userMessage.className =
-            'self-end bg-indigo-600 text-white px-4 py-1.5 rounded-xl inline-block max-w-xl';
+            'self-end bg-[#4f817a] text-white px-4 py-1.5 rounded-xl inline-block max-w-xl';
         userMessage.textContent = text;
         chatBox.appendChild(userMessage);
         scrollToBottom();
@@ -142,28 +143,28 @@ function sendMessage(text) {
         credentials: 'include',
         body: JSON.stringify({ interview_id, text })
     })
-    .catch(error => {
-        console.error('Send message error:', error);
-        isAIResponding = false;
-        setSendEnabled(true);
-        removeLoading();
-    });
+        .catch(error => {
+            console.error('Send message error:', error);
+            isAIResponding = false;
+            setSendEnabled(true);
+            removeLoading();
+        });
 }
 
 let isSubmitting = false;
 
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     if (isSubmitting) return;
     isSubmitting = true;
-    
+
     const text = chatInput.value.trim();
     if (text) {
         sendMessage(text);
         chatInput.value = '';
     }
-    
+
     setTimeout(() => {
         isSubmitting = false;
     }, 500);
@@ -325,7 +326,7 @@ async function initInterview() {
             renderMessage(msg);
         }
         scrollToBottom();
-        
+
         const results = await getResults();
         if (results) {
             await renderResults(results);
@@ -339,15 +340,19 @@ async function initInterview() {
 
 function renderMessage(msg) {
     const div = document.createElement('div');
+
     if (msg.role === 'user') {
         div.className =
-            'self-end bg-indigo-600 text-white px-4 py-1.5 rounded-xl inline-block max-w-xl';
+            'self-end bg-[#4f817a] text-white px-4 py-2 rounded-xl inline-block max-w-xl break-words';
     } else {
         div.className =
-            'self-start w-full whitespace-pre-wrap text-black px-3 py-2';
+            'self-start bg-[#4f817a]/10 text-[#1f3f3a] px-4 py-2 rounded-xl inline-block max-w-xl break-words';
     }
+
     div.textContent = msg.text;
     chatBox.appendChild(div);
+    scrollToBottom();
 }
+
 
 initInterview();

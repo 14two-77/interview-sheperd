@@ -76,42 +76,41 @@ async function loadJobPost() {
         function renderPosts(list, isMine = false) {
             if (list.length === 0) {
                 return `
-            <div class="col-span-full flex items-center justify-center my-10">
-                <div class="rounded-lg text-center text-gray-700 text-lg">
-                    No jobs found
-                </div>
-            </div>
-        `;
+                    <div class="col-span-full flex items-center justify-center my-10">
+                        <div class="rounded-lg text-center text-gray-700 text-lg">
+                            No jobs found
+                        </div>
+                    </div>
+                `;
             }
 
             return list.map(jobpost => `
-                <div class="bg-white border rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full relative">
+                <div class="bg-[#f0f5f4] border border-[#4f817a33] rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full relative">
                     ${isMine ? `
                     <div class="absolute top-2 right-2">
-                        <button onclick="toggleMenu('${jobpost._id}', event)" class="p-1 text-gray-500 hover:text-gray-700">
+                        <button onclick="toggleMenu('${jobpost._id}', event)" class="p-1 text-gray-500 hover:text-[#4f817a]">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
-
                         <div id="menu-${jobpost._id}" 
-                            class="dropdown-menu hidden absolute right-0 w-24 bg-white border rounded-lg shadow-lg z-10">
-                            <button onclick="editJob('${jobpost._id}')" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100">Edit</button>
-                            <button onclick="deleteJob('${jobpost._id}')" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 text-red-600">Delete</button>
+                            class="dropdown-menu hidden absolute right-0 w-24 bg-[#f0f5f4] border border-[#4f817a33] rounded-lg shadow-lg z-10">
+                            <button onclick="editJob('${jobpost._id}')" class="block w-full text-left px-3 py-2 text-sm hover:bg-[#d1e0dd]">Edit</button>
+                            <button onclick="deleteJob('${jobpost._id}')" class="block w-full text-left px-3 py-2 text-sm hover:bg-[#f5dede] text-red-600">Delete</button>
                         </div>
                     </div>
                     ` : ''}
 
-                    <h3 class="text-md font-semibold text-gray-900 mb-2 min-h-[2.8rem] mt-2 break-words">
+                    <h3 class="text-md font-semibold text-[#2c4f4a] mb-2 min-h-[2.8rem] mt-2 break-words">
                         ${jobpost.title}
                     </h3>
 
-                    <p class="text-gray-600 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
+                    <p class="text-gray-700 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
                         ${jobpost.description}
                     </p>
 
-                    <div class="flex justify-between items-center mt-auto pt-4 border-t">
+                    <div class="flex justify-between items-center mt-auto pt-4 border-t border-[#4f817a33]">
                         <span class="text-xs text-gray-500">Language: ${String(jobpost.language || "").toUpperCase()}</span>
                         <button onclick="startInterview('${jobpost._id}')" 
-                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
+                            class="bg-[#4f817a] text-white px-4 py-2 rounded-md hover:bg-[#446d68] text-sm transition">
                             Start
                         </button>
                     </div>
@@ -140,11 +139,11 @@ async function createJobPost() {
             language
         }
     })
-    .then(async () => {
-        HideLoading();
-        await Alert("Created Job Succesfully");
-    })
-    .catch(() => HideLoading())
+        .then(async () => {
+            HideLoading();
+            await Alert("Created Job Succesfully");
+        })
+        .catch(() => HideLoading())
 }
 
 async function updateJobPost(id) {
@@ -157,11 +156,11 @@ async function updateJobPost(id) {
         method: "PUT",
         body: { title, description, language }
     })
-    .then(async () => {
-        HideLoading();
-        await Alert("Updated Job Succesfully");
-    })
-    .catch(() => HideLoading())
+        .then(async () => {
+            HideLoading();
+            await Alert("Updated Job Succesfully");
+        })
+        .catch(() => HideLoading())
 }
 
 window.editJob = async function (id) {
@@ -203,7 +202,7 @@ const cancelResume = document.getElementById("cancelResume");
 
 let currentScenarioId = null;
 
-window.startInterview = function(scenarios_id) {
+window.startInterview = function (scenarios_id) {
     currentScenarioId = scenarios_id;
     resumeText.value = "";
     resumeModal.classList.remove("hidden");
@@ -236,17 +235,17 @@ resumeForm.addEventListener("submit", async (e) => {
             method: "POST",
             body: { scenario_id: currentScenarioId, resume_text: resume }
         })
-        .then(async (res) => {
-            HideLoading();
-            sessionStorage.setItem('interview', res.interview_id);
-            sessionStorage.setItem('page', "job-post");
+            .then(async (res) => {
+                HideLoading();
+                sessionStorage.setItem('interview', res.interview_id);
+                sessionStorage.setItem('page', "job-post");
 
-            loadPage('interview');
-        })
+                loadPage('interview');
+            })
     } catch (err) {
         HideLoading();
         await Alert("Failed to start interview.");
-        
+
         resumeModal.classList.add("hidden");
         resumeModal.classList.remove("flex");
         currentScenarioId = null;
