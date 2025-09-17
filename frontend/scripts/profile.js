@@ -1,3 +1,5 @@
+ShowLoading();
+
 async function getUser() {
     try {
         const res = await Fetch("user", { method: "GET" });
@@ -9,35 +11,55 @@ async function getUser() {
     }
 }
 
-ShowLoading();
 getUser();
+
+const passwordInput = document.getElementById("password");
+const confirmInput = document.getElementById("confirm-password");
+
+function updateRequired() {
+    if (passwordInput.value || confirmInput.value) {
+        passwordInput.required = true;
+        confirmInput.required = true;
+    } else {
+        passwordInput.required = false;
+        confirmInput.required = false;
+    }
+}
+
+passwordInput.addEventListener("input", updateRequired);
+confirmInput.addEventListener("input", updateRequired);
 
 document.getElementById("profile-edit-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     ShowLoading();
 
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirm-password").value;
+    const username = document.getElementById("username").value.trim();
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmInput.value.trim();
 
     if (password && password !== confirmPassword) {
         HideLoading();
-        return Alert("Passwords do not match!");
+        await Alert("Passwords do not match!");
+        return;
     }
+
+    const body = { username };
+    if (password) body.password = password;
 
     try {
         await Fetch("user", {
             method: "PUT",
-            body: { username, password }
+            body
         });
 
         HideLoading();
         await Alert("Updated Successfully");
 
-        document.getElementById("password").value = "";
-        document.getElementById("confirm-password").value = "";
+        passwordInput.value = "";
+        confirmInput.value = "";
+        updateRequired();
     } catch (err) {
         HideLoading();
-        await Alert("Updated Failed");
+        await Alert(err.data.error || "Update failed");
     }
 });

@@ -263,7 +263,7 @@ async function renderResults(results) {
     });
 
     const avg = (count > 0 ? (total / count).toFixed(2) : 0);
-    output += `\nAverage Score: ${avg} / 10\n`;
+    output += `\nAverage Score: ${avg} / 10.00\n`;
     if (results.suggestions) {
         output += `\nSuggestions: ${results.suggestions}`;
     }

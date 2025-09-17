@@ -34,7 +34,7 @@ document.getElementById("login-form")?.addEventListener("submit", async (e) => {
         if (AppState.isLoggedIn()) loadPage("job-post");
     } catch (err) {
         HideLoading();
-        await Alert("Login Failed");
+        await Alert(err.data.error || "Login Failed");
     }
 });
 

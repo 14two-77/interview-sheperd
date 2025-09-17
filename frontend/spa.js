@@ -1,7 +1,14 @@
 const app = document.getElementById("app");
 const pagesWithNavbar = ["job-post", "interviews", "profile"];
 
+let isLoading = false;
+let isInitialized = false;
+
 async function loadPage(page) {
+    if (isLoading) return;
+    
+    isLoading = true;
+
     const protectedPages = ["interview", "interviews", "job-post", "profile"];
     const authPages = ["login", "register"];
 
@@ -16,6 +23,10 @@ async function loadPage(page) {
         const html = await res.text();
         app.innerHTML = html;
 
+        document.querySelectorAll('script[data-dynamic-script]').forEach(script => {
+            script.remove();
+        });
+
         if (pagesWithNavbar.includes(page)) {
             await LoadNavbar();
         } else {
@@ -24,14 +35,38 @@ async function loadPage(page) {
         }
 
         const scriptPath = `./scripts/${page}.js?${Date.now()}`;
-        const s = document.createElement("script");
-        s.src = scriptPath;
-        s.type = "module";
-        app.appendChild(s);
+        const pageScript = document.createElement("script");
+        pageScript.src = scriptPath;
+        pageScript.type = "module";
+        pageScript.setAttribute('data-dynamic-script', 'page');
+        pageScript.setAttribute('data-page', page);
+        app.appendChild(pageScript);
 
     } catch (err) {
-        console.error(err);
         app.innerHTML = `<h1>Page not Found</h1>`;
+    } finally {
+        isLoading = false;
+    }
+}
+
+async function LoadNavbar() {
+    const placeholder = document.getElementById("navbar-placeholder");
+    if (!placeholder) return;
+
+    try {
+        const res = await fetch("./pages/navbar.html");
+        placeholder.innerHTML = await res.text();
+
+        document.querySelectorAll('script[data-dynamic-script="navbar"]').forEach(script => {
+            script.remove();
+        });
+
+        const navbarScript = document.createElement("script");
+        navbarScript.type = "module";
+        navbarScript.src = `./scripts/navbar.js?${Date.now()}`;
+        navbarScript.setAttribute('data-dynamic-script', 'navbar');
+        document.body.appendChild(navbarScript);
+    } catch (err) {
     }
 }
 
@@ -44,10 +79,30 @@ document.addEventListener("click", (e) => {
     loadPage(page);
 });
 
-AppState.loadUser().then(() => {
-    if (AppState.isLoggedIn()) {
-        loadPage("job-post");
-    } else {
-        loadPage("login");
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    if (isInitialized) return;
+    isInitialized = true;
+
+    AppState.loadUser().then(() => {
+        if (AppState.isLoggedIn()) {
+            loadPage("job-post");
+        } else {
+            loadPage("login");
+        }
+    });
 });
+
+if (document.readyState === 'loading') {
+
+} else {
+    if (!isInitialized) {
+        isInitialized = true;
+        AppState.loadUser().then(() => {
+            if (AppState.isLoggedIn()) {
+                loadPage("job-post");
+            } else {
+                loadPage("login");
+            }
+        });
+    }
+}

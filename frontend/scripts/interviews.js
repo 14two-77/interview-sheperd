@@ -1,6 +1,13 @@
 loadInterviews();
 
 async function loadInterviews() {
+    const container = document.getElementById("myInterviews");
+    const skeleton = document.getElementById("myInterviewsSkeleton");
+    if (!container || !skeleton) return;
+
+    container.classList.add("hidden");
+    skeleton.classList.remove("hidden");
+
     try {
         const result = await Fetch("interview", { method: "GET" });
         const container = document.getElementById("myInterviews");
@@ -21,7 +28,7 @@ async function loadInterviews() {
             const status = item.results ? "Finish" : "In Progress";
             const statusColor = item.results ? "bg-green-200 text-gray-700" : "bg-yellow-100 text-yellow-800";
             const statusText = item.results ? "View" : "Continue";
-            const statusColorBtn = item.results ? "bg-green-600 hover:bg-green-700" : "bg-yellow-600 hover:bg-yellow-700";
+            const statusColorBtn = item.results ? "bg-[#4f817a] hover:bg-[#446d68]" : "bg-yellow-600 hover:bg-yellow-700";
 
             return `
                 <div class="bg-[#f0f5f4] border border-[#4f817a33] rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full relative">
@@ -31,15 +38,15 @@ async function loadInterviews() {
                     </div>
 
                     <h3 class="text-md font-semibold text-[#2c4f4a] mb-2 min-h-[2.8rem] mt-2 break-words">
-                        ${item.title}
+                        ${escapeHtml(item.title)}
                     </h3>
 
                     <p class="text-gray-700 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
-                        ${item.description}
+                        ${escapeHtml(item.description)}
                     </p>
 
                     <div class="flex justify-between items-center mt-auto pt-4 border-t border-[#4f817a33]">
-                        <span class="text-xs text-gray-500">Language: ${String(item.language || "").toUpperCase()}</span>
+                        <span class="text-xs text-gray-500 font-semibold">Language: ${escapeHtml(String(item.language || "").toUpperCase())}</span>
                         <button onclick="startInterview('${item._id}')" 
                             class="${statusColorBtn} text-white px-4 py-2 rounded-md text-sm transition">
                             ${statusText}
@@ -51,6 +58,9 @@ async function loadInterviews() {
 
     } catch (err) {
         console.error(err);
+    } finally {
+        skeleton.classList.add("hidden");
+        container.classList.remove("hidden");
     }
 }
 

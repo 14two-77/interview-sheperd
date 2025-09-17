@@ -64,7 +64,6 @@ function Alert(message, blocking = true, delay = 3000) {
     });
 }
 
-
 const loadingOverlay = document.getElementById("loading-overlay");
 
 function ShowLoading() {
@@ -83,12 +82,21 @@ async function LoadNavbar() {
         const res = await fetch("./pages/navbar.html");
         placeholder.innerHTML = await res.text();
 
-        const script = document.createElement("script");
-        script.type = "module";
-        script.src = `./scripts/navbar.js?${Date.now()}`;
-        document.body.appendChild(script);
+        if (window.currentNavbarScript) window.currentNavbarScript.remove();
 
+        window.currentNavbarScript = document.createElement("script");
+        window.currentNavbarScript.type = "module";
+        window.currentNavbarScript.src = `./scripts/navbar.js?${Date.now()}`;
+        document.body.appendChild(window.currentNavbarScript);
     } catch (err) {
-        console.error("Error loading navbar:", err);
     }
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

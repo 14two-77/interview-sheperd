@@ -8,8 +8,13 @@ function hashPassword(password) {
 exports.register = async (req, res) => {
     try {
         const { username, password } = req.body;
+
+        const existingUser = await Users.findOne({ username });
+        if (existingUser) return res.status(400).json({ error: 'Username already exists' });
+
         const hashedPassword = hashPassword(password);
         await Users.create({ username, password: hashedPassword });
+
         res.status(200).json({ message: 'OK' });
     } catch (err) {
         res.status(500).json({ error: 'Internal server error.' });
@@ -19,18 +24,22 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
+
+        const user = await Users.findOne({ username });
+        if (!user) return res.status(401).json({ error: 'Invalid username or password' });
+
         const hashedPassword = hashPassword(password);
-        const user = await Users.findOne({ username, password: hashedPassword });
-        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    
+        if (user.password !== hashedPassword) return res.status(401).json({ error: 'Invalid username or password' });
+
         const isDev = process.env.NODE_ENV !== 'production';
-        res.setHeader('Set-Cookie',`user_id=${user._id}; Path=/; HttpOnly; SameSite=${isDev ? 'Lax' : 'None'}${isDev ? '' : '; Secure'}`);
-        
+        res.setHeader('Set-Cookie', `user_id=${user._id}; Path=/; HttpOnly; SameSite=${isDev ? 'Lax' : 'None'}${isDev ? '' : '; Secure'}`);
+
         res.status(200).json({ message: 'OK' });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
 
 exports.logout = async (req, res) => {
     try {

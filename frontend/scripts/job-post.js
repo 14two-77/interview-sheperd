@@ -27,6 +27,8 @@ function showCreateJobPostModal() {
     createModal.classList.remove("hidden");
     createModal.classList.add("flex");
     delete createForm.dataset.editId;
+
+    document.body.style.overflow = "hidden";
 }
 
 createBtn.addEventListener("click", showCreateJobPostModal);
@@ -34,12 +36,16 @@ createBtn.addEventListener("click", showCreateJobPostModal);
 cancelBtn.addEventListener("click", () => {
     createModal.classList.add("hidden");
     createModal.classList.remove("flex");
+
+    document.body.style.overflow = "";
 });
 
 createModal.addEventListener("click", (e) => {
     if (e.target === createModal) {
         createModal.classList.add("hidden");
         createModal.classList.remove("flex");
+
+        document.body.style.overflow = "";
     }
 });
 
@@ -56,10 +62,22 @@ createForm.addEventListener("submit", async (e) => {
     createModal.classList.remove("flex");
     createForm.reset();
 
+    document.body.style.overflow = "";
+
     loadJobPost();
 });
 
 async function loadJobPost() {
+    const myJobPostList = document.getElementById("myJobPostList");
+    const otherJobPostList = document.getElementById("otherJobPostList");
+    const mySkeleton = document.getElementById("myJobPostSkeleton");
+    const otherSkeleton = document.getElementById("otherJobPostSkeleton");
+
+    myJobPostList.classList.add("hidden");
+    otherJobPostList.classList.add("hidden");
+    mySkeleton.classList.remove("hidden");
+    otherSkeleton.classList.remove("hidden");
+
     try {
         const [resultMe, resultOther] = await Promise.all([
             Fetch("scenarios/me", { method: "GET" }),
@@ -68,10 +86,6 @@ async function loadJobPost() {
 
         const myPosts = Array.isArray(resultMe) ? resultMe : [];
         const otherPosts = Array.isArray(resultOther) ? resultOther : [];
-
-        const myJobPostList = document.getElementById("myJobPostList");
-        const otherJobPostList = document.getElementById("otherJobPostList");
-        if (!myJobPostList || !otherJobPostList) return;
 
         function renderPosts(list, isMine = false) {
             if (list.length === 0) {
@@ -100,15 +114,15 @@ async function loadJobPost() {
                     ` : ''}
 
                     <h3 class="text-md font-semibold text-[#2c4f4a] mb-2 min-h-[2.8rem] mt-2 break-words">
-                        ${jobpost.title}
+                        ${escapeHtml(jobpost.title)}
                     </h3>
 
                     <p class="text-gray-700 text-sm mb-4 flex-grow max-h-[20rem] overflow-y-auto">
-                        ${jobpost.description}
+                        ${escapeHtml(jobpost.description)}
                     </p>
 
                     <div class="flex justify-between items-center mt-auto pt-4 border-t border-[#4f817a33]">
-                        <span class="text-xs text-gray-500">Language: ${String(jobpost.language || "").toUpperCase()}</span>
+                        <span class="text-xs text-gray-500 font-semibold">Language: ${escapeHtml(String(jobpost.language || "").toUpperCase())}</span>
                         <button onclick="startInterview('${jobpost._id}')" 
                             class="bg-[#4f817a] text-white px-4 py-2 rounded-md hover:bg-[#446d68] text-sm transition">
                             Start
@@ -121,7 +135,11 @@ async function loadJobPost() {
         myJobPostList.innerHTML = renderPosts(myPosts, true);
         otherJobPostList.innerHTML = renderPosts(otherPosts, false);
     } catch (err) {
-        console.error(err);
+    } finally {
+        mySkeleton.classList.add("hidden");
+        otherSkeleton.classList.add("hidden");
+        myJobPostList.classList.remove("hidden");
+        otherJobPostList.classList.remove("hidden");
     }
 }
 
@@ -176,7 +194,6 @@ window.editJob = async function (id) {
         createModal.classList.remove("hidden");
         createModal.classList.add("flex");
     } catch (err) {
-        console.error(err);
     }
 };
 
@@ -191,7 +208,6 @@ window.deleteJob = async function (id) {
 
         loadJobPost();
     } catch (err) {
-        console.error(err);
     }
 };
 

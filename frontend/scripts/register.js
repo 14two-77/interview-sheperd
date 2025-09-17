@@ -38,6 +38,6 @@ document.getElementById("register-form")?.addEventListener("submit", async (e) =
         loadPage("login");
     } catch (err) {
         HideLoading();
-        await Alert("Register Failed");
+        await Alert(err.data.error || "Register Failed");
     }
 });
